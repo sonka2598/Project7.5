@@ -15,7 +15,7 @@ public:
 		email);
 	void deletePhone(int client_id, const string& phone);
 	void deleteClient(int id);
-	void findClient(const string& q);
+	vector<int> findClient(const string& q);
 	void listAll();
 private:
 	pqxx::connection conn; 
