@@ -61,18 +61,18 @@ void ClientManager::deleteClient(int id) {
 	tx.exec(pqxx::prepped{ "del_client" }, id); 
 	tx.commit();
 }
-void ClientManager::findClient(const string& q) {
+vector<int> ClientManager::findClient(const string& q) {
 	pqxx::work tx{ conn };
-	string pattern = "%" + q + "%";
-	auto res = tx.exec(pqxx::prepped{ "find_client" }, pqxx::params(pattern, pattern, pattern, pattern)); 
-		if (res.empty()) {
-			cout << "[SEARCH] Ничего не найдено по запросу: " << q << "\n";
-			return;
-		}
-	cout << "[SEARCH] Найдено " << res.size() << " клиент(ов) по запросу \"" << q << "\":\n";
-	for (auto row : res) {
-		printClientRow(row);
+	const string pattern = "%" + q + "%";
+	pqxx::result res = tx.exec(pqxx::prepped{ "find_client" },
+		pqxx::params{ pattern, pattern, pattern, pattern });
+	tx.commit();
+	std::vector<int> ids;
+	ids.reserve(res.size());
+	for (const auto& row : res) {
+		ids.push_back(row["id"].as<int>());
 	}
+	return ids;
 }
 void ClientManager::listAll() {
 	pqxx::work tx{ conn };
